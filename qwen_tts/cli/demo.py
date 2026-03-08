@@ -126,10 +126,11 @@ def build_demo(tts, ckpt, gen_kwargs_default):
 
     def _gen_common_kwargs(): return dict(gen_kwargs_default)
 
+    # FIX: theme and css moved to launch() for Gradio 6.0 compatibility
     theme = gr.themes.Soft(font=[gr.themes.GoogleFont("Source Sans Pro"), "Arial", "sans-serif"])
     css = ".gradio-container {max-width: none !important;}"
 
-    with gr.Blocks(theme=theme, css=css) as demo:
+    with gr.Blocks() as demo:
         gr.Markdown(f"# Qwen3 TTS Demo\n**Checkpoint:** `{ckpt}`  **Model Type:** `{model_kind}`")
 
         if model_kind == "custom_voice":
@@ -356,7 +357,20 @@ def main(argv=None) -> int:
     ckpt = _resolve_checkpoint(args)
     tts = Qwen3TTSModel.from_pretrained(ckpt, device_map=args.device, dtype=_dtype_from_str(args.dtype), attn_implementation="flash_attention_2" if args.flash_attn else None)
     demo = build_demo(tts, ckpt, _collect_gen_kwargs(args))
-    launch_kwargs: Dict[str, Any] = dict(server_name=args.ip, server_port=args.port, share=args.share, ssl_verify=bool(args.ssl_verify))
+
+    # FIX: theme & css moved here (Gradio 6.0), inbrowser=True opens browser automatically
+    theme = gr.themes.Soft(font=[gr.themes.GoogleFont("Source Sans Pro"), "Arial", "sans-serif"])
+    css = ".gradio-container {max-width: none !important;}"
+
+    launch_kwargs: Dict[str, Any] = dict(
+        server_name=args.ip,
+        server_port=args.port,
+        share=args.share,
+        ssl_verify=bool(args.ssl_verify),
+        theme=theme,
+        css=css,
+        inbrowser=True,  # automatically opens a browser tab on launch
+    )
     if args.ssl_certfile: launch_kwargs["ssl_certfile"] = args.ssl_certfile
     if args.ssl_keyfile: launch_kwargs["ssl_keyfile"] = args.ssl_keyfile
     demo.queue(default_concurrency_limit=int(args.concurrency)).launch(**launch_kwargs)
