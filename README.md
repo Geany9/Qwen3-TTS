@@ -1,5 +1,22 @@
 # Qwen3-TTS
 
+This fork extends the official Qwen3-TTS Gradio demo with automatic reference audio transcription powered by FasterWhisper, eliminating the need to manually type reference text when cloning voices.
+
+## Changes from upstream
+
+### Added
+- **FasterWhisper transcription** in the `Clone & Generate` tab — transcribes the reference audio and automatically fills the reference text field
+- **Model selection** — supports all faster-whisper model sizes (tiny, base, small, medium, large-v1/v2/v3, distil-large-v2/v3)
+- **Device and compute type options** — CUDA / CPU with float16, int8_float16, int8, float32
+
+### Modified
+- `demo.py` — added FasterWhisper UI block and transcription logic to the base model voice clone tab
+
+### Dependencies
+```bash
+pip install faster-whisper soundfile
+```
+
 <br>
 
 <p align="center">
